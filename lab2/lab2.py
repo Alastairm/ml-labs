@@ -72,34 +72,35 @@ def create_binary_class(label, data):
     is_label = [label == x for x in data]
     return [x * 1 for x in is_label]
 
-# Stochastic Gradient Descent
-# USE CLASSIFIER NOT REGRESSOR
-# https://scikit-learn.org/stable/modules/sgd.html
-from sklearn.linear_model import SGDRegressor
-train_is_s = create_binary_class('s', training["class"])
+def classification_using_sgdregressor():
+    # Stochastic Gradient Descent
+    # USE CLASSIFIER NOT REGRESSOR
+    # https://scikit-learn.org/stable/modules/sgd.html
+    from sklearn.linear_model import SGDRegressor
+    train_is_s = create_binary_class('s', training["class"])
 
-# Create SGD object
-sgd_reg = SGDRegressor()
-# Train the regressor
-sgd_reg.fit(train_features, train_is_s)
-# Run a prediction on the test set
-s_predict = sgd_reg.predict(test_features)
-predict_is_s = [(x > 0.5) * 1 for x in s_predict]
-# Get the actual classes
-test_is_s = create_binary_class('s', testing["class"])
-# Zip these into tuples for our confusion matrix:
-is_s = list(zip(predict_is_s, test_is_s))
-# Calculate confusion matrix values
-sum_predict_s_is_s = sum([x == (1,1) for x in is_s])
-sum_predict_s_not_s = sum([x == (1,0) for x in is_s])
-sum_predict_not_s_is_s = sum([x == (0,1) for x in is_s])
-sum_predict_not_s_not_s = sum([x == (0,0) for x in is_s])
-# Print confusion matrix
-print("              Prediction    ")
-print("            | Is S | Not S")
-print(f"Actual Is S |  {sum_predict_s_is_s}  |  {sum_predict_not_s_is_s}")
-print(f"      Not S |  {sum_predict_s_not_s}  |  {sum_predict_not_s_not_s}")
-# Show a scatter plot to show spread of predictions
-plt.scatter(test_is_s, s_predict)
-plt.show()
-# Create binary classes
+    # Create SGD object
+    sgd_reg = SGDRegressor()
+    # Train the regressor
+    sgd_reg.fit(train_features, train_is_s)
+    # Run a prediction on the test set
+    s_predict = sgd_reg.predict(test_features)
+    predict_is_s = [(x > 0.5) * 1 for x in s_predict]
+    # Get the actual classes
+    test_is_s = create_binary_class('s', testing["class"])
+    # Zip these into tuples for our confusion matrix:
+    is_s = list(zip(predict_is_s, test_is_s))
+    # Calculate confusion matrix values
+    sum_predict_s_is_s = sum([x == (1,1) for x in is_s])
+    sum_predict_s_not_s = sum([x == (1,0) for x in is_s])
+    sum_predict_not_s_is_s = sum([x == (0,1) for x in is_s])
+    sum_predict_not_s_not_s = sum([x == (0,0) for x in is_s])
+    # Print confusion matrix
+    print("              Prediction    ")
+    print("            | Is S | Not S")
+    print(f"Actual Is S |  {sum_predict_s_is_s}  |  {sum_predict_not_s_is_s}")
+    print(f"      Not S |  {sum_predict_s_not_s}  |  {sum_predict_not_s_not_s}")
+    # Show a scatter plot to show spread of predictions
+    plt.scatter(test_is_s, s_predict)
+    plt.show()
+    # Create binary classes
