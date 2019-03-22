@@ -12,14 +12,14 @@
     "python.linting.mypyEnabled": true,
 
     "python.linting.pep8Enabled": true,
-    "python.linting.prospectorEnabled": true,
+    "python.linting.pep8Path": "pycodestyle",
+    "python.linting.prospectorEnabled": false,
     "python.linting.prospectorArgs": [
         "-s", "veryhigh",
-        "--without-tool pylint",
-        "--full-pep8"
+        "--without-tool pylint"
     ],
     "python.linting.pydocstyleEnabled": false,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     "python.linting.pylintUseMinimalCheckers": true,
     "python.linting.pylintArgs": []
 }
