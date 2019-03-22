@@ -1,0 +1,25 @@
+{
+    "python.pythonPath": "../env/bin/python",
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "python.jediEnabled": false,
+    "python.dataScience.sendSelectionToInteractiveWindow": true,
+    "git.autofetch": true,
+    "python.linting.mypyEnabled": true,
+
+    "python.linting.pep8Enabled": true,
+    "python.linting.prospectorEnabled": true,
+    "python.linting.prospectorArgs": [
+        "-s", "veryhigh",
+        "--without-tool pylint",
+        "--full-pep8"
+    ],
+    "python.linting.pydocstyleEnabled": false,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintUseMinimalCheckers": true,
+    "python.linting.pylintArgs": []
+}
