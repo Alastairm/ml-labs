@@ -100,7 +100,3 @@ def classification_using_sgdregressor():
     print("            | Is S | Not S")
     print(f"Actual Is S |  {sum_predict_s_is_s}  |  {sum_predict_not_s_is_s}")
     print(f"      Not S |  {sum_predict_s_not_s}  |  {sum_predict_not_s_not_s}")
-    # Show a scatter plot to show spread of predictions
-    plt.scatter(test_is_s, s_predict)
-    plt.show()
-    # Create binary classes
