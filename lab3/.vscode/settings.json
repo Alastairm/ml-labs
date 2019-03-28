@@ -19,7 +19,7 @@
         "--full-pep8"
     ],
     "python.linting.pydocstyleEnabled": false,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     "python.linting.pylintUseMinimalCheckers": true,
     "python.linting.pylintArgs": []
     }

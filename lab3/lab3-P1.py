@@ -51,11 +51,11 @@ test = test.reset_index()
 """
 It looks like there's a second column of text in addition to the class labels:
 'Sequence Name', if there's only a few unique strings in this column it may be
-a useful feature variable. 
+a useful feature variable.
 """
 len(set(list(train['Sequence Name'])))
 """
-268 unique strings for 268 rows of data, 
+268 unique strings for 268 rows of data,
 """
 # train.describe()
 # train.hist()
@@ -104,7 +104,7 @@ def test_classifier(clf: Any,  # Any SKLearn classifier object
                     normalise_data: bool = False,
                     normalise_accuracy_score: bool = True,
                     f1_average_method: str = 'weighted'
-                    ) -> Tuple[Array, bool]:
+                    ) -> Tuple[Array, float, float]:
     """
     Fit clf against training data (train_X & train_y), run predictions on test
     data (test_X) and compare predictions to test_y, return confusion matrix
@@ -148,7 +148,7 @@ modification, are permitted provided that the following conditions are met:
   c. Neither the name of the Scikit-learn Developers  nor the names of
      its contributors may be used to endorse or promote products
      derived from this software without specific prior written
-     permission. 
+     permission.
 
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -210,5 +210,3 @@ def plot_confusion_matrix(confusion_matrix, classes,
 
 plot_confusion_matrix(cm, CLASS_LABELS)
 plt.show()
-
-
