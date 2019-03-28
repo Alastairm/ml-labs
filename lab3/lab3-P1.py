@@ -9,7 +9,7 @@ from typing import (
     Union
 )
 
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn import (
@@ -93,18 +93,17 @@ train_y, train_X = preprocess_data(train)
 test_y, test_X = preprocess_data(test)
 
 
-SVM_clf = svm.SVC()
+svm_clf = svm.SVC()
 
-DT_clf = tree.DecisionTreeClassifier()
+dt_clf = tree.DecisionTreeClassifier()
 
 
 def test_classifier(clf: Any,  # Any SKLearn classifier object
                     train_X: Array, train_y: Series,
                     test_X: Array, test_y: Series,
                     normalise_data: bool = False,
-                    normalise_accuracy_score: bool = True,
                     f1_average_method: str = 'weighted'
-                    ) -> Tuple[Array, float, float]:
+                    ) -> Dict[str, Any]:
     """
     Fit clf against training data (train_X & train_y), run predictions on test
     data (test_X) and compare predictions to test_y, return confusion matrix
@@ -115,54 +114,33 @@ def test_classifier(clf: Any,  # Any SKLearn classifier object
         train_X = scaler.transform(train_X)
         test_X = scaler.transform(test_X)
 
-    pred_y = clf.fit(train_X, train_y).predict(test_X)  # Do the classification
+    # Do the classification
+    pred_y = clf.fit(train_X, train_y).predict(test_X)
+
+    # Confusion matrix
     confusion_matrix = metrics.confusion_matrix(test_y, pred_y)
-    accuracy = metrics.accuracy_score(test_y, pred_y,
-                                      normalize=normalise_accuracy_score)
+    # Various Metrics
+    accuracy = metrics.accuracy_score(test_y, pred_y)
+    correct_count = metrics.accuracy_score(test_y, pred_y, normalize=False)
+    error_count = len(test_y) - correct_count
     f1 = metrics.f1_score(test_y, pred_y, average=f1_average_method)
-    return confusion_matrix, accuracy, f1
+
+    results = {
+        'y_true': test_y,
+        'y_pred': pred_y,
+        'confusion_matrix': confusion_matrix,
+        'accuracy': accuracy,
+        'f1': f1,
+        'correct': correct_count,
+        'errors': error_count
+    }
+    return results
 
 
-(test_classifier(SVM_clf, train_X, train_y, test_X, test_y))
-(test_classifier(SVM_clf, train_X, train_y, test_X, test_y, normalise_data=True))
-cm, acc, f1 = (test_classifier(DT_clf, train_X, train_y, test_X, test_y))
-
-
-"""
-The code in this cell is used subject to the terms below:
-
-New BSD License
-
-Copyright (c) 2007–2019 The scikit-learn developers.
-All rights reserved.
-
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-  a. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  b. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-  c. Neither the name of the Scikit-learn Developers  nor the names of
-     its contributors may be used to endorse or promote products
-     derived from this software without specific prior written
-     permission.
-
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-"""
+svm_unnorm_results = test_classifier(svm_clf, train_X, train_y, test_X, test_y)
+svm_norm_results = test_classifier(svm_clf, train_X, train_y, test_X, test_y,
+                                   normalise_data=True)
+dt_results = test_classifier(dt_clf, train_X, train_y, test_X, test_y)
 
 
 def plot_confusion_matrix(confusion_matrix, classes,
@@ -172,6 +150,8 @@ def plot_confusion_matrix(confusion_matrix, classes,
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
+    Copyright (c) 2007–2019 The scikit-learn developers.
+    Used under license.
     """
     cm = confusion_matrix
     if not title:
@@ -208,5 +188,26 @@ def plot_confusion_matrix(confusion_matrix, classes,
     return ax
 
 
-plot_confusion_matrix(cm, CLASS_LABELS)
+def print_result_metrics(svm, svm_norm, dt):
+    sua, suf = svm['accuracy'], svm['f1']
+    sna, snf = svm_norm['accuracy'], svm_norm['f1']
+    dta, dtf = dt['accuracy'], dt['f1']
+    sue, sne, dte = svm['errors'], svm_norm['errors'], dt['errors']
+    print("            | Accuracy | F1 Score | Errors")
+    print(f"SVM, unnorm |  {sua:.4f}  |   {suf:.2f}   | {sue}")
+    print(f"SVM, norm   |  {sna:.4f}  |   {snf:.2f}   | {sne}")
+    print(f"DT          |  {dta:.4f}  |   {dtf:.2f}   | {dte}")
+
+
+print_result_metrics(svm_unnorm_results,
+                     svm_norm_results,
+                     dt_results)
+
+plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
+                      title="SVM, data unnormalised, confusion matrix")
+plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
+                      title="SVM, data normalised, confusion matrix")
+
+plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
+                      title="DT, data unnormalised, confusion matrix")
 plt.show()
