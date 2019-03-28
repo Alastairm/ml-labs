@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegressionCV, SGDClassifier
 CLASS_LABELS = ['s', 'h', 'd', 'o']
 DATA_LABELS = ["b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9"]
 
-# Types
+# Additional type notation
 Array = typing.Union[List, np.array, pd.DataFrame]  # np "array_like"
 
 
@@ -26,7 +26,7 @@ Array = typing.Union[List, np.array, pd.DataFrame]  # np "array_like"
 1.1 Read in the contents of both csv files.
 1.2 Inspect what the columns are by displaying the first few lines
     of the file.
-1.3 Use appropriate functions to display (visualize) the different
+`1.3 Use appropriate functions to display (visualize) the different
     features (or attributes / columns).
 1.4 Display some plots for visualizing the data.
 1.5 Describe what you see.
