@@ -20,8 +20,14 @@ from sklearn import (
     tree
 )
 
-DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
+DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+SEASON = {
+    'fall': 80,
+    'winter': 172,
+    'sprint': 266,
+    'summer': 356
+}
 
 def get_day_of_year(month: int, day_of_month: int) -> int:
     day_of_year = sum(DAYS_IN_MONTH[:month - 1])
@@ -37,6 +43,7 @@ def get_month_and_day(day_of_year: int) -> Tuple[int, int]:
             day_of_year -= DAYS_IN_MONTH[i]
         else:
             return (month, day_of_year)
+
 
 solar_data = pd.read_csv('SolarExposure_2018_Data.csv')
 temp_data = pd.read_csv('Temperature_2018_Data.csv')
