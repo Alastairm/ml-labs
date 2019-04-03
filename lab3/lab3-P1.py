@@ -20,8 +20,8 @@ from sklearn import (
     tree
 )
 
-Array = Union[List[List], np.ndarray, pd.DataFrame]
-Series = Union[List, pd.core.series.Series]
+Array2D = Union[List[List], np.ndarray, pd.DataFrame]
+Array1D = Union[List, pd.core.series.Series]
 
 CLASS_LABELS = ['cp', 'im', 'pp', 'imU', 'om']
 DROP_CLASSES = ['omL', 'imL', 'imS']
@@ -71,7 +71,7 @@ treated exactly the same.
 def preprocess_data(data: pd.DataFrame,
                     drop_classes: List[str] = DROP_CLASSES,
                     drop_columns: List[str] = DROP_COLUMNS
-                    ) -> Tuple[Series, Array]:
+                    ) -> Tuple[Array1D, Array2D]:
     """
     Drop rows containing data for classes in drop_classes and remove columns
     contained in drop_columns, returns the data's class labels (y) and the
@@ -98,8 +98,8 @@ dt_clf = tree.DecisionTreeClassifier()
 
 
 def test_classifier(clf: Any,  # Any SKLearn classifier object
-                    train_X: Array, train_y: Series,
-                    test_X: Array, test_y: Series,
+                    train_X: Array2D, train_y: Array1D,
+                    test_X: Array2D, test_y: Array1D,
                     normalise_data: bool = False,
                     f1_average_method: str = 'weighted'
                     ) -> Dict[str, Any]:
@@ -188,14 +188,15 @@ def plot_confusion_matrix(confusion_matrix, classes,
 
 
 def print_result_metrics(svm, svm_norm, dt):
-    sua, suf = svm['accuracy'], svm['f1']
-    sna, snf = svm_norm['accuracy'], svm_norm['f1']
-    dta, dtf = dt['accuracy'], dt['f1']
-    sue, sne, dte = svm['errors'], svm_norm['errors'], dt['errors']
-    print("            | Accuracy | F1 Score | Errors")
-    print(f"SVM, unnorm |  {sua:.4f}  |   {suf:.2f}   | {sue}")
-    print(f"SVM, norm   |  {sna:.4f}  |   {snf:.2f}   | {sne}")
-    print(f"DT          |  {dta:.4f}  |   {dtf:.2f}   | {dte}")
+    results = [
+        [svm['accuracy'], svm['f1'], svm['errors']],
+        [svm_norm['accuracy'], svm_norm['f1'], svm_norm['errors']],
+        [dt['accuracy'], dt['f1'], dt['errors']]
+    ]
+    rows = ['SVM, unnormalised', 'SVM, normalised', 'DT, unnormalised']
+    columns = ['Accuracy', 'F1 Score', 'Error Count']
+    results = pd.DataFrame(results, rows, columns)
+    print(results)
 
 
 print_result_metrics(svm_unnorm_results,
@@ -203,10 +204,10 @@ print_result_metrics(svm_unnorm_results,
                      dt_results)
 
 plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
-                      title="SVM, data unnormalised, confusion matrix")
-plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
-                      title="SVM, data normalised, confusion matrix")
+                      title="SVM, data unnormalised")
+plot_confusion_matrix(svm_norm_results['confusion_matrix'], CLASS_LABELS,
+                      title="SVM, data normalised")
 
-plot_confusion_matrix(svm_unnorm_results['confusion_matrix'], CLASS_LABELS,
-                      title="DT, data unnormalised, confusion matrix")
+plot_confusion_matrix(dt_results['confusion_matrix'], CLASS_LABELS,
+                      title="DT, data unnormalised")
 plt.show()
