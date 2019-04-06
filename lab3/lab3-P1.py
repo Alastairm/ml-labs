@@ -20,8 +20,8 @@ from sklearn import (
     tree
 )
 
-Array2D = Union[List[List], np.ndarray, pd.DataFrame]
 Array1D = Union[List, pd.core.series.Series]
+Array2D = Union[List[List], np.ndarray, pd.DataFrame]
 
 CLASS_LABELS = ['cp', 'im', 'pp', 'imU', 'om']
 DROP_CLASSES = ['omL', 'imL', 'imS']
