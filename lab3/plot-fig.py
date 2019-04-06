@@ -25,6 +25,7 @@ def plot_predictions(clf, axes):
     plt.contourf(x0, x1, y_decision, cmap=plt.cm.brg, alpha=0.1)
 
 
+axes = [-1.5, 2.5, -1, 1.5]
 gamma1, gamma2 = 0.1, 5
 C1, C2 = 0.001, 1000
 hyperparams = (gamma1, C1), (gamma1, C2), (gamma2, C1), (gamma2, C2)
@@ -42,9 +43,10 @@ plt.figure(figsize=(11, 7))
 
 for i, svm_clf in enumerate(svm_clfs):
     plt.subplot(221 + i)
-    plot_predictions(svm_clf, [-1.5, 2.5, -1, 1.5])
-    plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
+    plot_predictions(svm_clf, axes)
+    plot_dataset(X, y, axes)
     gamma, C = hyperparams[i]
     plt.title(r"$\gamma = {}, C = {}$".format(gamma, C), fontsize=16)
 
 plt.show()
+
