@@ -13,7 +13,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn import (
-    model_selection
+    ensemble,
+    linear_model,
+    model_selection,
+    pipeline,
+    preprocessing,
+    svm
 )
 
 
@@ -30,3 +35,17 @@ def data_clean() -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
 
 
 train_y, test_y, train_X, test_X = data_clean()
+
+
+svm_clf = pipeline.Pipeline(steps=[
+    ('scale', preprocessing.StandardScaler()),
+    ('svc', svm.SVC())
+])
+
+logit_clf = linear_model.LogisticRegression()
+
+ensemble_clf = ensemble.VotingClassifier(estimators=[
+    ('svc', svm_clf), ('logit', logit_clf)
+])
+
+pred = ensemble_clf.fit(train_X, train_y).predict(test_X)

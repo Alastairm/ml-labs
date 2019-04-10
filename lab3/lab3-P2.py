@@ -52,9 +52,8 @@ ax2.set_ylabel(r"Temperature ($^\circ$C)", size=12)
 
 fig.tight_layout()
 ax2.set_title("Perth Daily Temperature & Solar Exposure", size=20)
-fig.legend( ('Temp', 'Solar'), loc=4)
+fig.legend(('Temp', 'Solar'), loc=4)
 plt.show()
-
 
 
 """Arrange Data into X & y train & test sets."""
@@ -92,17 +91,17 @@ def test_params(hyperparams, model='SVM', normalise=True):
     """
     test either a SVM or DT Regressor with given hyperparameters and
     print the results in a table.
-    
+
     Parameters
     ----------
     model: str, 'SVM' or 'DT'
     Selects regressor type.
-    
+
     normalise: bool
     Whether to normalise the data prior to regression or not.
     """
     results = []
-    columns = list(hyperparams[0].keys()) + ['Train MSE', 'Test MSE']    
+    columns = list(hyperparams[0].keys()) + ['Train MSE', 'Test MSE']
     for params in hyperparams:
         result = list(params.values())
         if 'model' in params:
@@ -135,56 +134,56 @@ hyperparams = [
 ]
 test_params(hyperparams)
 
-# hyperparams = [
-#     {'model': 'SVM'},
-#     {'model': 'DT'}
-# ]
-# test_params(hyperparams)
+"""
+hyperparams = [
+    {'model': 'SVM'},
+    {'model': 'DT'}
+]
+test_params(hyperparams)
 
-# hyperparams = [
-#     {'kernel': 'linear'},
-#     {'kernel': 'rbf'},
-# #    {'kernel': 'poly'},  # Removed from tests, too slow.
-#     {'kernel': 'sigmoid'}
-# ]
-# test_params(hyperparams)
+hyperparams = [
+    {'kernel': 'linear'},
+    {'kernel': 'rbf'},
+#    {'kernel': 'poly'},  # Removed from tests, too slow.
+    {'kernel': 'sigmoid'}
+]
+test_params(hyperparams)
 
-# hyperparams = [
-#     {'kernel': 'linear', 'C': 0.1},
-#     {'kernel': 'linear', 'C': 1},
-#     {'kernel': 'linear', 'C': 10},
-#     {'kernel': 'rbf', 'C': 0.1},
-#     {'kernel': 'rbf', 'C': 1},
-#     {'kernel': 'rbf', 'C': 10},
-# ]
-# test_params(hyperparams)
+hyperparams = [
+    {'kernel': 'linear', 'C': 0.1},
+    {'kernel': 'linear', 'C': 1},
+    {'kernel': 'linear', 'C': 10},
+    {'kernel': 'rbf', 'C': 0.1},
+    {'kernel': 'rbf', 'C': 1},
+    {'kernel': 'rbf', 'C': 10},
+]
+test_params(hyperparams)
 
-# hyperparams = [
-#     {'kernel': 'linear', 'C': 1},
-#     {'kernel': 'rbf', 'C': 1},
-#     {'kernel': 'rbf', 'C': 10},
-#     {'kernel': 'rbf', 'C': 100},
-# ]
-# test_params(hyperparams)
+hyperparams = [
+    {'kernel': 'linear', 'C': 1},
+    {'kernel': 'rbf', 'C': 1},
+    {'kernel': 'rbf', 'C': 10},
+    {'kernel': 'rbf', 'C': 100},
+]
+test_params(hyperparams)
 
-# hyperparams = [
-#     {'min_samples_split': 2},
-#     {'min_samples_split': 0.01},
-#     {'min_samples_split': 0.05},
-#     {'min_samples_split': 0.1},
-#     {'min_samples_split': 0.2},
-#     {'min_samples_split': 0.3},
-#     {'min_samples_split': 0.4},
-#     {'min_samples_split': 0.5},
-# ]
-# test_params(hyperparams, 'DT')
+hyperparams = [
+    {'min_samples_split': 2},
+    {'min_samples_split': 0.01},
+    {'min_samples_split': 0.05},
+    {'min_samples_split': 0.1},
+    {'min_samples_split': 0.2},
+    {'min_samples_split': 0.3},
+    {'min_samples_split': 0.4},
+    {'min_samples_split': 0.5},
+]
+test_params(hyperparams, 'DT')
 
-# hyperparams = [
-#     {'min_samples_split': 0.2, 'criterion': 'mse', 'splitter': 'best'},
-#     {'min_samples_split': 0.2, 'criterion': 'friedman_mse', 'splitter': 'best'},
-#     {'min_samples_split': 0.2, 'criterion': 'mae', 'splitter': 'best'},
-#     {'min_samples_split': 0.2, 'criterion': 'mse', 'splitter': 'random'},
-#     {'min_samples_split': 0.2, 'criterion': 'friedman_mse', 'splitter': 'random'},
-#     {'min_samples_split': 0.2, 'criterion': 'mae', 'splitter': 'random'}
-# ]
-# test_params(hyperparams, 'DT')
+hyperparams = [
+    {'min_samples_split': 0.2, 'criterion': 'mse', 'splitter': 'best'},
+    {'min_samples_split': 0.2, 'criterion': 'mae', 'splitter': 'best'},
+    {'min_samples_split': 0.2, 'criterion': 'mse', 'splitter': 'random'},
+    {'min_samples_split': 0.2, 'criterion': 'mae', 'splitter': 'random'}
+]
+test_params(hyperparams, 'DT')
+"""
