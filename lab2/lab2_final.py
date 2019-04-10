@@ -164,9 +164,6 @@ print_table([training_label_proportions, testing_label_proportions,
 """
 
 # Scaling of sample features
-# We don't need to be told ints are turning into floats...
-DataConversionWarning = sklearn.exceptions.DataConversionWarning
-sklearn.warnings.filterwarnings("ignore", category=DataConversionWarning)
 # Scale sample feature values
 scaler = StandardScaler().fit(training)
 training_scaled = scaler.transform(training)
