@@ -1,21 +1,19 @@
 """
 Lab 3 Project 1
 """
-from typing import (
-    Any,
-    Dict,
-    List,
-    Tuple,
-    Union
-)
+from typing import Tuple
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn as sk
 from sklearn import (
     ensemble,
+    linear_model,
+    metrics,
     model_selection,
+    preprocessing,
     pipeline,
     svm
 )
@@ -26,45 +24,56 @@ data = pd.read_csv(data_url)
 
 
 def data_clean() -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
-    y = data['status']
+    # Replace 1 & 0 with 'parkinsons' & 'healthy' respectively.
+    y = ['parkinsons' if s == 1 else 'healthy' for s in data['status']]
+    # Remove name (string value) & status (class label) from attributes.
     X = data.drop(columns=['name', 'status'])
-    return model_selection.train_test_split(y, X, test_size=0.2)
+    return sk.model_selection.train_test_split(y, X, test_size=0.2)
+
+def data_clean() -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
+    # Replace 1 & 0 with 'parkinsons' & 'healthy' respectively.
+    y = data['status']
+    for i, status in enumerate(y):
+        y[i] = 'parkinsons' if status == 1 else 'healthy'
+    y.cl
+    # Remove name (string value) & status (class label) from attributes.
+    X = data.drop(columns=['name', 'status'])
+    return sk.model_selection.train_test_split(y, X, test_size=0.2)
 
 
 train_y, test_y, train_X, test_X = data_clean()
+train_y, test_y, train_X, test_X = data_clean()
 
+standard_scaler = sk.preprocessing.StandardScaler()
 
 svm_clf = sk.pipeline.Pipeline(steps=[
-    ('scale', sk.preprocessing.StandardScaler()),
+    ('scale', standard_scaler),
     ('svc', sk.svm.SVC())
 ])
 
-logit_clf = sk.linear_model.LogisticRegression()
+logit_clf = sk.pipeline.Pipeline(steps=[
+    ('scale', standard_scaler),
+    ('logit', sk.linear_model.LogisticRegression())
+])
 
-ensemble_clf = sk.pipeline.Pipeline(
-    steps=[
-        ('scale', sk.preprocessing.StandardScaler()),
-        ('clf', sk.ensemble.VotingClassifier(
-            estimators=[('svc', svm_clf), ('logit', logit_clf)]
-        ))
-    ]
+ensemble_clf = sk.ensemble.VotingClassifier(
+    estimators=[('svc', svm_clf), ('logit', logit_clf)]
 )
 
 
 svm_pred = svm_clf.fit(train_X, train_y).predict(test_X)
 logit_pred = logit_clf.fit(train_X, train_y).predict(test_X)
-
 ensemble_pred = ensemble_clf.fit(train_X, train_y).predict(test_X)
 
-print(sk.metrics.f1_score(test_y, svm_pred))
-print(sk.metrics.f1_score(test_y, logit_pred))
-print(sk.metrics.f1_score(test_y, ensemble_pred))
+print(f"SVM: {sk.metrics.f1_score(test_y, svm_pred):05}")
+print(f"Logit: {sk.metrics.f1_score(test_y, logit_pred):05}")
+print(f"Ensemble: {sk.metrics.f1_score(test_y, ensemble_pred):05}")
 
 
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
                           title=None,
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Blues) -> mpl.axes.Axes:
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
