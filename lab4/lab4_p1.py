@@ -24,24 +24,12 @@ data = pd.read_csv(data_url)
 
 
 def data_clean() -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
-    # Replace 1 & 0 with 'parkinsons' & 'healthy' respectively.
-    y = ['parkinsons' if s == 1 else 'healthy' for s in data['status']]
-    # Remove name (string value) & status (class label) from attributes.
-    X = data.drop(columns=['name', 'status'])
-    return sk.model_selection.train_test_split(y, X, test_size=0.2)
-
-def data_clean() -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
-    # Replace 1 & 0 with 'parkinsons' & 'healthy' respectively.
     y = data['status']
-    for i, status in enumerate(y):
-        y[i] = 'parkinsons' if status == 1 else 'healthy'
-    y.cl
     # Remove name (string value) & status (class label) from attributes.
     X = data.drop(columns=['name', 'status'])
     return sk.model_selection.train_test_split(y, X, test_size=0.2)
 
 
-train_y, test_y, train_X, test_X = data_clean()
 train_y, test_y, train_X, test_X = data_clean()
 
 standard_scaler = sk.preprocessing.StandardScaler()

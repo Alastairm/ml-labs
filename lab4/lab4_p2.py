@@ -17,3 +17,59 @@ from sklearn import (
     pipeline,
     svm
 )
+
+
+data_url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data'
+attribute_names = [
+    'Sex',
+    'Length',
+    'Diameter',
+    'Height',
+    'Whole weight',
+    'Shucked weight',
+    'Viscera weight',
+    'Shell weight',
+    'Rings',
+]
+data = pd.read_csv(data_url, names=attribute_names)
+
+# data.hist()
+# plt.show()
+
+
+def plot_rings_vs_sex(data):
+    infant_rings = []
+    female_rings = []
+    male_rings = []
+    for i in range(len(data)):
+        if data.loc[i, 'Sex'] == 'I':
+            infant_rings.append(data.loc[i, 'Rings'])
+        elif data.loc[i, 'Sex'] == 'F':
+            female_rings.append(data.loc[i, 'Rings'])
+        elif data.loc[i, 'Sex'] == 'M':
+            male_rings.append(data.loc[i, 'Rings'])
+    ages = range(0, 30)
+    infant_ages = [infant_rings.count(i) for i in ages]
+    female_ages = [female_rings.count(i) for i in ages]
+    male_ages = [male_rings.count(i) for i in ages]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(ages, infant_ages, label='Infant')
+    ax.plot(ages, female_ages, label='Female')
+    ax.plot(ages, male_ages, label='Male')
+
+    ax.set_ylabel('Number of abalone')
+    ax.set_xlabel('Ring count')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+plot_rings_vs_sex(data)
+
+
+def arrange_data(data, ring_handler=None)\
+ -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
+    pass
+    # Replace Sex attribute with 'Is adult' value.
+
