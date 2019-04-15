@@ -70,7 +70,9 @@ plot_rings_vs_sex(data)
 
 def arrange_data(data, ring_handler=None)\
  -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
-    pass
+    """
+        Clean data then split into test & training sets.
+    """
     # Replace Sex attribute with 'Is adult' value.
     is_adult = []
     for i in range(len(data)):
@@ -79,4 +81,21 @@ def arrange_data(data, ring_handler=None)\
         else:
             is_adult.append(1)
     is_adult_df = pd.DataFrame(is_adult, columns=['Is adult'])
-    pd.concat()
+    pd.concat([data, is_adult_df], axis=1)
+
+    # Drop, greoup, or do nothing with outlier ring counts.
+    if ring_handler == 'drop':
+        for i in range(len(data)):
+            if data.loc[i, 'Rings'] < 5 or data.loc[i, 'Rings'] > 20:
+                data.drop(i)
+    elif ring_handler == 'group':
+        for i in range(len(data)):
+            if data.loc[i, 'Rings'] < 5:
+                data.loc[i, 'Rings'] = 4
+            elif data.loc[i, 'Rings'] > 20:
+                data.loc[i, 'Rings'] = 21
+    
+    y = data['Rings']
+    X = data.drop(columns=['Sex', 'Rings'])
+    
+    return model_selection.train_test_split(y, X, test_size=0.1)
