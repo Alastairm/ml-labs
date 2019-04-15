@@ -72,4 +72,11 @@ def arrange_data(data, ring_handler=None)\
  -> Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
     pass
     # Replace Sex attribute with 'Is adult' value.
-
+    is_adult = []
+    for i in range(len(data)):
+        if data.loc[i, 'Sex'] == 'I':
+            is_adult.append(0)
+        else:
+            is_adult.append(1)
+    is_adult_df = pd.DataFrame(is_adult, columns=['Is adult'])
+    pd.concat()
