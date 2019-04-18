@@ -209,69 +209,52 @@ rf_reg = sk.ensemble.RandomForestRegressor(n_estimators=100)
 rf_reg_fit = dc(rf_reg).fit(train_x, train_y)
 
 
-def rank_feature_importance(reg, columns, reverse=False):
+def rank_feature_importance(reg_fitted, columns):
     """ Return a list of (feature, importance) tuples."""
-    _reg = dc(rf_reg_fit)
+    _reg = dc(reg_fitted)
     importance = _reg.feature_importances_
-    if not (len(importance) == len(columns)):
-        raise ValueError()
+    assert(len(importance) == len(columns))
     feat_impo = []
     for i, feature in enumerate(columns):
         feat_impo.append((feature, importance[i]))
-    feat_impo.sort(key=lambda x: x[1], reverse=reverse)
+    feat_impo.sort(key=lambda x: x[1], reverse=True)
     return feat_impo
 
-# feature_importances = rank_feature_importance(rf_reg, train_x.columns, True)
-# names = ['Feature', 'Importance']
-# print(pd.DataFrame(feature_importances, columns=names))
+imp = rank_feature_importance(rf_reg_fit, train_x.columns)
+names = ['Feature', 'Importance']
+print(pd.DataFrame(imp, columns=names))
 
 
-def drop_features(data: List[pd.DataFrame], features: List[str]) -> List:
-    """ Remove given feature columns from DataFrames."""
-    return [d.drop(columns=features) for d in dc(data)]
-
-
-def drop_n_features(reg, train_x, test_X, n=1)\
+def manual_feature_reduction(train_x, test_x, feat, n)\
  -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """ Remove the n least important features.
+    """ Remove the n least important features."""
+    feat.sort(key=lambda x: x[1])
+    if type(feat[0]) is tuple:
+        feat = [f[0] for f in feat]
 
-    Args:
-        clf: sklearn classifier used to determine feature importance.
-        train: training data set.
-        test: testing data set.
-        n: number of features to remove
-    
-    Returns:
-        (Tuple[pd.DataFrame, pd.DataFrame, List[str], pd.DataFrame])
-        
-    """
-    _reg = dc(rf_reg_fit)
-    ranked_feat = rank_feature_importance(_reg, train_x.columns)
-    feat_to_drop = []
-    for i in range(n):
-        feat_to_drop.append(ranked_feat[i][0])
-    train_d, test_d = drop_features([train_x, test_x], feat_to_drop)
-    return (train_d, test_d)
+    print(feat[:n])
+    _train_x = dc(train_x).drop(columns=feat[:n])
+    _test_x = dc(test_x).drop(columns=feat[:n])
+    return (_train_x, _test_x)
 
 
 def test_manual_feature_reduction():
     results = []
-    _reg = dc(rf_reg_fit)
     for i in range(8):
-        _train_x, _test_x = drop_n_features(_reg, train_x, test_x, n=i)
-        _reg2 = rf_reg.fit(_train_x, train_y)
-        train_mse, test_mse = reg_mse(_reg2, _train_x, _test_x, train_y, test_y)
+        xtr, xte = manual_feature_reduction(train_x, test_x, imp, n=i)
+        _reg2 = rf_reg.fit(xtr, train_y)
+        train_mse, test_mse = reg_mse(_reg2, xtr, xte, train_y, test_y)
         results.append([i, train_mse, test_mse])
     names = ['Features Dropped', 'Train MSE', 'Test MSE']
     return pd.DataFrame(results, columns=names)
 
-# print(test_manual_feature_reduction())
+print(test_manual_feature_reduction())
 
-pca = sk.decomposition.PCA(.99)
-pca.fit(train_x, train_y)
-train_x_pca = pca.transform(train_x)
-test_x_pca = pca.transform(test_x)
-results = reg_mse(rf_reg, train_x_pca, test_x_pca, train_y, test_y)
-print(results)
-results = reg_mse(rf_reg, train_x, test_x, train_y, test_y)
-print(results)
+# pca = sk.decomposition.PCA(.99)
+# pca.fit(train_x, train_y)
+# train_x_pca = pca.transform(train_x)
+# test_x_pca = pca.transform(test_x)
+# results = reg_mse(rf_reg, train_x_pca, test_x_pca, train_y, test_y)
+# print(results)
+# results = reg_mse(rf_reg, train_x, test_x, train_y, test_y)
+# print(results)
