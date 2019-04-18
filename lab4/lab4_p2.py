@@ -1,6 +1,7 @@
 """
 Lab 3 Project 1
 """
+from copy import deepcopy as dc
 from typing import (Any, List, Tuple)
 import warnings
 
@@ -10,6 +11,7 @@ import numpy as np
 import pandas as pd
 import sklearn as sk
 from sklearn import (
+    decomposition,
     ensemble,
     linear_model,
     metrics,
@@ -81,20 +83,7 @@ def plot_rings_vs_sex(data):
 
     return fig
 
-
-plot_rings_vs_sex(data)
-
-
-def handle_sex_attribute(data: pd.DataFrame) -> pd.DataFrame:
-    is_adult = []
-    for i in range(len(data)):
-        if data.loc[i, 'Sex'] == 'I':
-            is_adult.append(0)
-        else:
-            is_adult.append(1)
-    is_adult_df = pd.DataFrame(is_adult, columns=['Is adult'])
-    data = pd.concat([data, is_adult_df], axis=1)
-    return data
+# plot_rings_vs_sex(data)
 
 
 def handle_ring_outliers(data: Any, method: str) -> pd.DataFrame:
@@ -132,7 +121,7 @@ def handle_ring_outliers_xy(x: pd.DataFrame, y: pd.Series, method: str)\
 
 
 def arrange_data(data: pd.DataFrame, ring_handler='drop')\
- -> Tuple[list, list, pd.DataFrame, pd.DataFrame]:
+ -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     Clean data then split into test & training sets.
 
@@ -144,8 +133,19 @@ def arrange_data(data: pd.DataFrame, ring_handler='drop')\
         Tuple[pd.Series, pd.Series, pd.DataFrame, pd.DataFrame]:
             Tuple containing class labels & class attributes.
     """
+    def handle_sex_attribute(data: pd.DataFrame) -> pd.DataFrame:
+        is_adult = []
+        for i in range(len(data)):
+            if data.loc[i, 'Sex'] == 'I':
+                is_adult.append(0)
+            else:
+                is_adult.append(1)
+        is_adult_df = pd.DataFrame(is_adult, columns=['Is adult'])
+        data = pd.concat([data, is_adult_df], axis=1)
+        return data
+
     # Avoid editing original data
-    data = data.copy()
+    data = dc(data)
 
     # Replace Sex attribute with 'Is adult' value.
     data = handle_sex_attribute(data)
@@ -199,37 +199,40 @@ def test_aba_regressor_ring_handling(data):
     headers = ['Ring Handler', 'Train MSE', 'Test MSE']
     return pd.DataFrame(results, columns=headers)
 
-print(test_aba_regressor_ring_handling(data))
+# print(test_aba_regressor_ring_handling(data))
 
 
 train_x, test_x, train_y, test_y = arrange_data(data)
 
 
 rf_reg = sk.ensemble.RandomForestRegressor(n_estimators=100)
-
-no_fr_reg = rf_reg.fit(train_x, train_y)
-
-print(pd.DataFrame([no_fr_reg.feature_importances_], columns=train_x.columns))
-
-
-def drop_features(data: List[pd.DataFrame], features: List[str]) -> List:
-    """ Remove given feature columns from DataFrames."""
-    return [d.drop(columns=features) for d in data.copy()]
+rf_reg_fit = dc(rf_reg).fit(train_x, train_y)
 
 
 def rank_feature_importance(reg, columns, reverse=False):
     """ Return a list of (feature, importance) tuples."""
-    importance = reg.feature_importances_
-    assert(len(importance) == len(columns))
+    _reg = dc(rf_reg_fit)
+    importance = _reg.feature_importances_
+    if not (len(importance) == len(columns)):
+        raise ValueError()
     feat_impo = []
     for i, feature in enumerate(columns):
         feat_impo.append((feature, importance[i]))
     feat_impo.sort(key=lambda x: x[1], reverse=reverse)
     return feat_impo
 
+# feature_importances = rank_feature_importance(rf_reg, train_x.columns, True)
+# names = ['Feature', 'Importance']
+# print(pd.DataFrame(feature_importances, columns=names))
 
-def drop_n_features(reg, train, test, n=1)\
- -> Tuple[pd.DataFrame, pd.DataFrame, List[str]]:
+
+def drop_features(data: List[pd.DataFrame], features: List[str]) -> List:
+    """ Remove given feature columns from DataFrames."""
+    return [d.drop(columns=features) for d in dc(data)]
+
+
+def drop_n_features(reg, train_x, test_X, n=1)\
+ -> Tuple[pd.DataFrame, pd.DataFrame]:
     """ Remove the n least important features.
 
     Args:
@@ -242,14 +245,33 @@ def drop_n_features(reg, train, test, n=1)\
         (Tuple[pd.DataFrame, pd.DataFrame, List[str], pd.DataFrame])
         
     """
-    ranked_feat = rank_feature_importance(reg, train.columns)
+    _reg = dc(rf_reg_fit)
+    ranked_feat = rank_feature_importance(_reg, train_x.columns)
     feat_to_drop = []
     for i in range(n):
         feat_to_drop.append(ranked_feat[i][0])
-    train_d, test_d = drop_features([train, test], feat_to_drop)
-    return (train_d, test_d, feat_to_drop)
+    train_d, test_d = drop_features([train_x, test_x], feat_to_drop)
+    return (train_d, test_d)
 
-train_x_mr, test_x_mr, dropped = drop_n_features(rf_reg, train_x, test_x, n=1)
 
-manual_fr_reg = rf_reg.fit(train_x_mr, train_y)
+def test_manual_feature_reduction():
+    results = []
+    _reg = dc(rf_reg_fit)
+    for i in range(8):
+        _train_x, _test_x = drop_n_features(_reg, train_x, test_x, n=i)
+        _reg2 = rf_reg.fit(_train_x, train_y)
+        train_mse, test_mse = reg_mse(_reg2, _train_x, _test_x, train_y, test_y)
+        results.append([i, train_mse, test_mse])
+    names = ['Features Dropped', 'Train MSE', 'Test MSE']
+    return pd.DataFrame(results, columns=names)
 
+# print(test_manual_feature_reduction())
+
+pca = sk.decomposition.PCA(.99)
+pca.fit(train_x, train_y)
+train_x_pca = pca.transform(train_x)
+test_x_pca = pca.transform(test_x)
+results = reg_mse(rf_reg, train_x_pca, test_x_pca, train_y, test_y)
+print(results)
+results = reg_mse(rf_reg, train_x, test_x, train_y, test_y)
+print(results)
