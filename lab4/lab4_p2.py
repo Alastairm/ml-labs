@@ -111,16 +111,7 @@ def handle_ring_outliers(data: Any, method: str) -> pd.DataFrame:
         return data
 
 
-def handle_ring_outliers_xy(x: pd.DataFrame, y: pd.Series, method: str)\
- -> Tuple[pd.DataFrame, pd.Series]:
-    data = pd.concat([x, y], axis=1)
-    data = handle_ring_outliers(data, method=method)
-    y = data['Rings']
-    x = data.drop(columns=['Rings'])
-    return (x, y)
-
-
-def arrange_data(data: pd.DataFrame, ring_handler='drop')\
+def clean_data(data: pd.DataFrame, ring_handler='drop')\
  -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     Clean data then split into test & training sets.
@@ -151,7 +142,7 @@ def arrange_data(data: pd.DataFrame, ring_handler='drop')\
     data = handle_sex_attribute(data)
 
     # Drop, group, or do nothing with outlier ring counts.
-    data = handle_ring_outliers(data, 'drop')
+    data = handle_ring_outliers(data, ring_handler)
 
     y = data['Rings']
     x = data.drop(columns=['Sex', 'Rings'])
@@ -183,8 +174,18 @@ def reg_mse(regressor: Any,
     return (train_mse, test_mse)
 
 
-def test_aba_regressor_ring_handling(data):
-    train_x, test_x, train_y, test_y = arrange_data(data)
+def test_regressor_ring_handling(train_x, test_x, train_y, test_y):
+    """
+    Runs regressions with outlier rings dropped, grouped and left as is.
+    """
+    def handle_ring_outliers_xy(x: pd.DataFrame, y: pd.Series, method: str)\
+     -> Tuple[pd.DataFrame, pd.Series]:
+        data = pd.concat([x, y], axis=1)
+        data = handle_ring_outliers(data, method=method)
+        y = data['Rings']
+        x = data.drop(columns=['Rings'])
+        return (x, y)
+
     results = []
     for handler in ['none', 'drop', 'group']:
         _train_x, _train_y =\
@@ -199,10 +200,10 @@ def test_aba_regressor_ring_handling(data):
     headers = ['Ring Handler', 'Train MSE', 'Test MSE']
     return pd.DataFrame(results, columns=headers)
 
-# print(test_aba_regressor_ring_handling(data))
+# print(test_aba_regressor_ring_handling(train_x, test_x, train_y, test_y))
 
 
-train_x, test_x, train_y, test_y = arrange_data(data)
+train_x, test_x, train_y, test_y = clean_data(data)
 
 
 rf_reg = sk.ensemble.RandomForestRegressor(n_estimators=100)
